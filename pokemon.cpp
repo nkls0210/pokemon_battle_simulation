@@ -9,7 +9,10 @@
 using std::cout, std::vector, std::string, std::srand, std::ifstream, std::istream;
 
 static double effChart[19][19];
+static string natureChart[5][5];
 const string status[7] = {"", "PAR", "PSN", "TOX", "BRN", "SLP", "FRZ"};
+#define SLEEP 0
+#define TOXIC 1
 
 class Type{
     public:
@@ -82,69 +85,82 @@ class StatusMove: public Move{
 class Pokemon{
     public:
     string name;
+    string nature;
+    unsigned baseStats[6]; // HP/Atk/Def/SpA/SpD/Spe
+    int currentStats[6];
+    Move* moveset[4];
     Type typing[2];
-    Move* moves[4];
-    int stats[6]; //0=hp 1=attack 2=def 3=spatt 4=spdef 5=speed
-    unsigned condValue;
-    unsigned sleepCounter;
-    unsigned toxCounter;
-    unsigned sixPercentHP;
+    unsigned conditionValue;
+    unsigned turnCounters[2]; // 0=sleep timer, 1=toxic timer
 
-    void initMoves(vector<Move*> moveVector){
-        assert(moveVector.size() != 0);
-        assert(moveVector.size() < 5);
-        for(unsigned i = 0; i < moveVector.size(); i++){
-            moves[i] = moveVector[i];
+    void initMoveset(vector<Move*> moves){
+        assert(moves.size() == 4);
+        for(unsigned i = 0; i < moves.size(); i++){
+            moveset[i] = moves[i];
         }
-    }
-    void initStats(vector<unsigned> statsVector){
-        assert(statsVector.size() == 6);
-        for(unsigned i = 0; i < statsVector.size(); i++){
-            stats[i] = statsVector[i];
-        }
-    }
-    void initNature(unsigned inc, unsigned dec){
-        assert((inc != 0) && (dec != 0));
-        assert((inc < 6) && (dec < 6));
-        if(inc != dec){
-            stats[inc] = stats[inc] + stats[inc]*0.1;
-            stats[dec] = stats[dec] - stats[dec]*0.1;
-        }
-    }
-    void initTyping(vector<Type*> typeVector){
-        assert(typeVector.size() != 0);
-        assert(typeVector.size() < 3);
-
-        typing[0] = *typeVector[0];
-        typing[1] = *typeVector[1];
-    }
-    //initializers
-
-    Pokemon():name("noName"){
-        for(unsigned i = 0; i < 4; i++){    //only 4 moves
-            moves[i] = new Move();
-        }
-        for(unsigned i = 0; i < 6; i++){    //only 6 stats
-            stats[i] = 1;
-        }
-    }
-    Pokemon(string n, vector<Move*> moveVector, vector<unsigned> statsVector, vector<Type*> typeVector){
-        name = n;
-        initMoves(moveVector);
-        initStats(statsVector);
-        initTyping(typeVector);
-        condValue = 0;
-        sleepCounter = 0;
-        toxCounter = 0;
-        sixPercentHP = 0.06 * stats[0];
     }
 
+    void initStats(vector<unsigned> stats){
+        assert(stats.size() == 6);
+        for(unsigned i = 0; i < stats.size(); i++){
+            baseStats[i] = stats[i];
+            currentStats[i] = stats[i];
+        }
+    }
+
+    void initTyping(vector<Type*> types){
+        assert(types.size() == 2);
+        for(unsigned i = 0; i < types.size(); i++){
+            typing[i] = *types[i];
+        }
+    }
+
+    void initNature(string nameNature){
+        nature = nameNature;
+        for(unsigned i = 0; i < 5; i++){
+            for(unsigned j = 0; j < 5; j++){
+                if(natureChart[i][j] == nameNature){
+                    currentStats[i+1] = currentStats[i+1] + baseStats[i+1]*0.1;
+                    currentStats[j+1] = currentStats[j+1] - baseStats[j+1]*0.1;
+                    break;
+                }
+            }
+        }
+    }
+
+    Pokemon():name("noName"), conditionValue(0){
+        for(unsigned i = 0; i < 6; i++){
+            baseStats[i] = 1;
+            currentStats[i] = baseStats[i];
+        }
+
+        for(unsigned i = 0; i < 4; i++){
+            moveset[i] = new Move();
+        }
+
+        for(unsigned i = 0; i < 2; i++){
+            typing[i] = Type("none");
+            turnCounters[i] = 0;
+        }
+    }
+
+    Pokemon(string n, string nat, vector<unsigned> stats, vector<Move*> moves, vector<Type*> types): name(n), conditionValue(0){
+        initStats(stats);
+        initMoveset(moves);
+        initTyping(types);
+        initNature(nat);
+        turnCounters[SLEEP] = 0; turnCounters[TOXIC] = 0; 
+    }
+    
     bool isAlive(){
-        if(stats[0] <= 0) return false;
+        if(currentStats[0] <= 0){
+            currentStats[0] = 0;
+            return false;
+        }
         return true;
     }
 
-    bool canAttack(unsigned condValue, unsigned turnCounter){
+    bool canAttack(unsigned condValue, unsigned sleepCounter){
         int randValue = rand() % 100;
         switch(condValue){
             case 1:
@@ -154,14 +170,14 @@ class Pokemon{
                 }
                 return true;
             case 5:
-                if(turnCounter == 0){
+                if(sleepCounter == 0){
                     cout << name << " is fast asleep...\n";
-                    sleepCounter++;
+                    turnCounters[SLEEP]++;
                     return false;
                 }
-                else if(turnCounter == 3){
+                else if(sleepCounter == 3){
                     cout << name << " woke up!\n";
-                    sleepCounter = 0;
+                    turnCounters[SLEEP] = 0;
                     condValue=0;
                     return true;
                 }
@@ -189,29 +205,33 @@ class Pokemon{
                 }
             default:
                 return true;
-        }  
+        }
     }
 
-    void takeStatusDamage(unsigned condValue, unsigned turnCounter){
+    void takeStatusDamage(unsigned condValue){
+        if(!isAlive()){
+            return;
+        }
+        
         switch(condValue){
             case 2:
                 cout << name << " took damage from poison!\n";
-                stats[0] = stats[0] - (2*sixPercentHP);
+                currentStats[0] = currentStats[0] - 0.12*baseStats[0];
                 break;
             case 3:
                 cout << name << " took damage from poison!\n";
-                toxCounter++;
-                stats[0] = stats[0] - ((turnCounter+1)*sixPercentHP);
+                turnCounters[TOXIC]++;
+                currentStats[0] = currentStats[0] - (turnCounters[TOXIC]*0.06)*baseStats[0];
                 break;
             case 4:
                 cout << name << " took damage from burn!\n";
-                stats[0] -= sixPercentHP;
+                currentStats[0] = currentStats[0] - 0.06*baseStats[0];
                 break;
             default:
                 break;
         }
     }
-
+    
     void statusChangeMessage(unsigned condValue){
         switch(condValue){
             case 1:
@@ -240,68 +260,64 @@ class Pokemon{
         }
     }
 
-    void attack(Pokemon& other, Move*& move){
-        unsigned hit =  rand() % 100;
+    unsigned damageCalc(Pokemon& other, Move*& move){
         unsigned crit = rand() % 100;
+        unsigned damage;
+        double typingMultiplier = 1;
 
-        unsigned tmpCondValue = other.condValue;
+        damage = move->strength;
+        typingMultiplier *= effChart[(move->moveType).typeValue][(other.typing[0]).typeValue];
+        typingMultiplier *= effChart[(move->moveType).typeValue][(other.typing[1]).typeValue];
+        damage*=typingMultiplier;
 
-        if(isAlive() && other.isAlive() && canAttack(condValue, sleepCounter)){
-            cout << name << " uses " << move->attackName << "\n";
-            if(hit < move->accuracy){
-                double damage;
-                double typingMultiplier = 1;
+        if(move->physicalMove){
+            damage = damage*currentStats[1]/other.currentStats[2];
+        }
+        else{
+            damage = damage*currentStats[3]/other.currentStats[4];
+        }
 
-                damage = move->strength;
+        if((typing[0].typeValue == (move->moveType).typeValue) ||(typing[1].typeValue == (move->moveType).typeValue)){
+            damage*= 1.5;
+        }
+        // STAB Bonus
 
-                typingMultiplier = typingMultiplier*effChart[(move->moveType).typeValue][(other.typing[0]).typeValue]*effChart[(move->moveType).typeValue][(other.typing[1]).typeValue];
+        if(crit > 89){
+            damage*=1.5;
+            cout << "Critical hit!\n";
+        }
+        if(typingMultiplier > 1){
+            cout << "It's super effective!\n";
+        }
+        else if(typingMultiplier == 0){
+            cout << "It doesn't affect the opponent...\n";
+        }
+        else if(typingMultiplier < 1){
+            cout << "It's not very effective...\n";
+        }
+        return damage;
+    }
 
+    void attack(Pokemon& other, Move*& move){
+        unsigned hit = rand() % 100;
+        unsigned tmpCondValue = other.conditionValue;
 
-                if(move->physicalMove){
-                    damage = damage*stats[1]/other.stats[2];
-                }
-                else{
-                    damage = damage*stats[3]/other.stats[4];
-                }
-                if ((crit > 89) && (move->strength != 0)){
-                    damage *= 1.5;
-                    cout << "Critical hit!\n";
-                }
+        cout << name << " uses " << move->attackName << "\n";
+        if(hit < move->accuracy){
+            other.currentStats[0] -= damageCalc(other,move);
 
-                if(typingMultiplier > 1){
-                    cout << "It's super effective!\n";
-                }
-                else if((typingMultiplier < 1) && (typingMultiplier != 0)){
-                    cout << "It's not very effective...\n";
-                }
-                else if(typingMultiplier == 0){
-                    cout << "It doesn't affect the opponent...\n";
-                }
-
-                damage *= typingMultiplier;
-
-                if(((move->moveType).typeValue == typing[0].typeValue)||((move->moveType).typeValue == typing[1].typeValue)){
-                    damage*=1.5;
-                }
-                //STAB Bonus
-
-                other.stats[0] -= damage;
-                if(other.condValue == 0){
-                    other.condValue = move->moveEffect();
-                }
-                if((tmpCondValue != other.condValue) && (other.condValue != 0)){
-                    other.statusChangeMessage(other.condValue);
+            if(other.isAlive() && (other.conditionValue == 0)){
+                other.conditionValue = move->moveEffect();
+                if(other.conditionValue != tmpCondValue){
+                    other.statusChangeMessage(other.conditionValue);
                 }
             }
-            else{
-                cout << name << "'s attack missed!\n";
-            }
-            if (!other.isAlive()){
+            else if(!other.isAlive()){
                 cout << other.name << " fainted!\n";
             }
-            else{
-                cout << other.name << " has " << other.stats[0] << "HP left.\n";
-            }
+        }
+        else{
+            cout << name << "'s attack missed!\n";
         }
     }
 };
@@ -350,50 +366,7 @@ StatusMove* operator>>(istream& in, StatusMove*& move){
     return move;
 }
 
-Pokemon* operator>>(istream& in, Pokemon*& poke){
-    string name;
-    vector<Type*> typing;
-    vector<unsigned> pokeStats;
-    vector<Move*> moveset;
-    
-    Move* move;
-    StatusMove* sMove;
-    string command;
-    string typeString;
-    Type tmpType;
-    int tmpValue;
-
-    in >> command;
-    assert(command == "Pokemon:");
-    in >> name;
-    for(unsigned i = 0; i < 2; i++){
-        in >> typeString;
-        typing.push_back(new Type(typeString));
-    }
-
-    in >> command;
-    assert(command == "Stats:");
-    for(unsigned i = 0; i < 6; i++){
-        in >> tmpValue;
-        pokeStats.push_back(tmpValue);
-    }
-
-    for(unsigned i = 0; i < 4; i++){
-        in >> command;
-        assert((command == "Move:") || (command == "StatusMove:"));
-        if(command == "Move:"){
-            in >> move;
-            moveset.push_back(move);
-        }
-        else if(command == "StatusMove:"){
-            in >> sMove;
-            moveset.push_back(sMove);
-        }
-    }
-    poke = new Pokemon(name,moveset,pokeStats,typing);
-    return poke;
-}
-
+//TO DO: new pokemon operator
 //void printTurnEnd(Pokemon& poke1, Pokemon& poke2){}
 
 void simulateBattle(Pokemon& poke1, Pokemon& poke2, unsigned maxRounds){
@@ -403,21 +376,21 @@ void simulateBattle(Pokemon& poke1, Pokemon& poke2, unsigned maxRounds){
     for(unsigned i=0; i < maxRounds; i++){
         pickMove1 = rand() % 4;
         pickMove2 = rand() % 4;
-        oneIsFaster = (poke1.stats[5] > poke2.stats[5]);
+        oneIsFaster = (poke1.currentStats[5] > poke2.currentStats[5]);
         if(oneIsFaster){
-            poke1.attack(poke2, poke1.moves[pickMove1]);
+            poke1.attack(poke2, poke1.moveset[pickMove1]);
             cout << "\n";
-            poke2.attack(poke1, poke2.moves[pickMove2]);
-            poke1.takeStatusDamage(poke1.condValue, poke1.toxCounter);
-            poke2.takeStatusDamage(poke2.condValue, poke2.toxCounter);
+            poke2.attack(poke1, poke2.moveset[pickMove2]);
+            poke1.takeStatusDamage(poke1.conditionValue);
+            poke2.takeStatusDamage(poke2.conditionValue);
             cout << "--------------------------------\n";
         }
         else{
-            poke2.attack(poke1, poke2.moves[pickMove2]);
+            poke2.attack(poke1, poke2.moveset[pickMove2]);
             cout << "\n";
-            poke1.attack(poke2, poke1.moves[pickMove1]);
-            poke2.takeStatusDamage(poke2.condValue, poke2.toxCounter);
-            poke1.takeStatusDamage(poke1.condValue, poke1.toxCounter);
+            poke1.attack(poke2, poke1.moveset[pickMove1]);
+            poke2.takeStatusDamage(poke2.conditionValue);
+            poke1.takeStatusDamage(poke1.conditionValue);
             cout << "--------------------------------\n";
         }
         if(!(poke1.isAlive() && poke2.isAlive())){
@@ -439,6 +412,16 @@ void initEffChart(){
     effChart[18][18] = 1;
 }
 
+void initNatureChart(){
+    ifstream inputFile;
+    inputFile.open("natureChart.txt");
+    for(unsigned i = 0; i < 5; i++){
+        for(unsigned j = 0; j < 5; j++){
+            inputFile >> natureChart[i][j];
+        }
+    }
+}
+
 int main(int argc, char** argv){
 
     if(argc == 2){
@@ -457,6 +440,7 @@ int main(int argc, char** argv){
     unsigned rounds = 0;
 
     inputFile.open(filename);
+
     inputFile >> pokemon1;
     inputFile >> pokemon2;
     
