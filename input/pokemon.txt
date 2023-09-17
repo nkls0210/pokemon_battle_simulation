@@ -1,0 +1,15 @@
+Pokemon: Venusaur Grass Poison
+Stats: 301 200 202 236 236 196 
+Move: SeedBomb Grass 80 100 1
+StatusMove: SludgeBomb Poison 90 100 0 PSN 30
+StatusMove: SleepPowder Grass 0 75 0 SLP 100
+Move: Earthquake Ground 100 100 1
+
+Pokemon: Primeape Fighting none
+Stats: 271 246 156 156 176 226 
+Move: CrossChop Fighting 100 80 1
+StatusMove: IcePunch Ice 75 100 1 FRZ 10
+StatusMove: ThunderPunch Electric 75 100 1 PAR 10
+StatusMove: Toxic Poison 0 90 0 TOX 100
+
+Rounds: 15

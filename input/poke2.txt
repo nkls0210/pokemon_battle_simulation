@@ -1,0 +1,15 @@
+Pokemon: Venusaur Grass Poison
+Stats: 301 200 202 236 236 196 
+StatusMove: SleepPowder Grass 0 0 0 SLP 100
+StatusMove: SleepPowder Grass 0 0 0 SLP 100
+StatusMove: SleepPowder Grass 0 0 0 SLP 100
+StatusMove: SleepPowder Grass 0 0 0 SLP 100
+
+Pokemon: Primeape Fighting none
+Stats: 271 246 156 156 176 226 
+StatusMove: Toxic Poison 0 90 0 TOX 100
+StatusMove: Toxic Poison 0 90 0 TOX 100
+StatusMove: Toxic Poison 0 90 0 TOX 100
+StatusMove: Toxic Poison 0 90 0 TOX 100
+
+Rounds: 15
