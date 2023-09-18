@@ -1,0 +1,7 @@
+Pokemon: [PokeName] [Type1] [Type2]
+Nature: [Nature]
+Stats: [HP Stat] [ATK Stat] [DEF Stat] [SATK Stat] [SDEF Stat] [SPEED Stat] 
+Move: [Name] [Type] [Strength] [Accuracy] [Physical?]
+StatusMove: [Name] [Type] [Strength] [Accuracy] [Physical?] [Condition] [chanceOfCondition]
+
+Rounds: [Number of Rounds]
