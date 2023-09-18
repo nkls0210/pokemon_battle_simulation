@@ -302,22 +302,24 @@ class Pokemon{
         unsigned hit = rand() % 100;
         unsigned tmpCondValue = other.conditionValue;
 
-        cout << name << " uses " << move->attackName << "\n";
-        if(hit < move->accuracy){
-            other.currentStats[0] -= damageCalc(other,move);
+        if(isAlive() && other.isAlive() && canAttack(conditionValue, turnCounters[SLEEP])){
+            cout << name << " uses " << move->attackName << "\n";
+            if(hit < move->accuracy){
+                other.currentStats[0] -= damageCalc(other,move);
 
-            if(other.isAlive() && (other.conditionValue == 0)){
-                other.conditionValue = move->moveEffect();
-                if(other.conditionValue != tmpCondValue){
-                    other.statusChangeMessage(other.conditionValue);
+                if(other.isAlive() && (other.conditionValue == 0)){
+                    other.conditionValue = move->moveEffect();
+                    if(other.conditionValue != tmpCondValue){
+                        other.statusChangeMessage(other.conditionValue);
+                    }
+                }
+                else if(!other.isAlive()){
+                    cout << other.name << " fainted!\n";
                 }
             }
-            else if(!other.isAlive()){
-                cout << other.name << " fainted!\n";
+            else{
+                cout << name << "'s attack missed!\n";
             }
-        }
-        else{
-            cout << name << "'s attack missed!\n";
         }
     }
 };
@@ -366,8 +368,72 @@ StatusMove* operator>>(istream& in, StatusMove*& move){
     return move;
 }
 
-//TO DO: new pokemon operator
-//void printTurnEnd(Pokemon& poke1, Pokemon& poke2){}
+Pokemon* operator>>(istream& in, Pokemon*& poke){
+    string name;
+    string nature;
+    vector<Type*> typing;
+    vector<unsigned> pokeStats;
+    vector<Move*> moveset;
+
+    Move* move;
+    StatusMove* sMove;
+    string command;
+    string typeString;
+    Type tmpType;
+    int tmpValue;
+
+    in >> command;
+    assert(command == "Pokemon:");
+    in >> name;
+    for(unsigned i = 0; i < 2; i++){
+        in >> typeString;
+        typing.push_back(new Type(typeString));
+    }
+
+    in >> command;
+    assert(command == "Nature:");
+    in >> nature;
+
+    in >> command;
+    assert(command == "Stats:");
+    for(unsigned i = 0; i < 6; i++){
+        in >> tmpValue;
+        pokeStats.push_back(tmpValue);
+    }
+
+    for(unsigned i = 0; i < 4; i++){
+        in >> command;
+        assert((command == "Move:") || (command == "StatusMove:"));
+        if(command == "Move:"){
+            in >> move;
+            moveset.push_back(move);
+        }
+        else if(command == "StatusMove:"){
+            in >> sMove;
+            moveset.push_back(sMove);
+        }
+    }
+    poke = new Pokemon(name,nature,pokeStats,moveset,typing);
+    return poke;
+}
+
+void printTurnEnd(Pokemon& poke1, Pokemon& poke2){
+    cout << "\n";
+    cout << poke1.name << " HP[" << poke1.currentStats[0] << "/" << poke1.baseStats[0] << "]";
+    if(poke1.conditionValue != 0){
+        cout << "("<< status[poke1.conditionValue] << ")    ";
+    }
+    else{
+        cout << "         ";
+    }
+    cout << poke2.name << " HP[" << poke2.currentStats[0] << "/" << poke2.baseStats[0] << "]";
+    if(poke2.conditionValue != 0){
+        cout << "("<< status[poke2.conditionValue] << ")\n";
+    }
+    else{
+        cout << "\n";
+    }   
+}
 
 void simulateBattle(Pokemon& poke1, Pokemon& poke2, unsigned maxRounds){
     bool oneIsFaster = true;
@@ -383,7 +449,6 @@ void simulateBattle(Pokemon& poke1, Pokemon& poke2, unsigned maxRounds){
             poke2.attack(poke1, poke2.moveset[pickMove2]);
             poke1.takeStatusDamage(poke1.conditionValue);
             poke2.takeStatusDamage(poke2.conditionValue);
-            cout << "--------------------------------\n";
         }
         else{
             poke2.attack(poke1, poke2.moveset[pickMove2]);
@@ -391,8 +456,9 @@ void simulateBattle(Pokemon& poke1, Pokemon& poke2, unsigned maxRounds){
             poke1.attack(poke2, poke1.moveset[pickMove1]);
             poke2.takeStatusDamage(poke2.conditionValue);
             poke1.takeStatusDamage(poke1.conditionValue);
-            cout << "--------------------------------\n";
         }
+        printTurnEnd(poke1,poke2);
+        cout << "--------------------------------\n";
         if(!(poke1.isAlive() && poke2.isAlive())){
             break;
         }
@@ -400,8 +466,13 @@ void simulateBattle(Pokemon& poke1, Pokemon& poke2, unsigned maxRounds){
 }
 
 void initEffChart(){
+    cout << "Reading Efficiency Chart...";
     ifstream inputFile;
-    inputFile.open("effChart.txt");
+    inputFile.open("init/effChart.txt");
+    if(!inputFile.is_open()){
+        cout << "\n Error: effChart.txt not found\n";
+        assert(inputFile.is_open());
+    }
     for(unsigned i = 0; i < 18; i++){
         for(unsigned j = 0; j < 18; j++){
             inputFile >> effChart[i][j];
@@ -410,28 +481,38 @@ void initEffChart(){
         effChart[18][i] = 1;
     }
     effChart[18][18] = 1;
+    cout << "Done!\n";
 }
 
 void initNatureChart(){
+    cout << "Reading Nature Chart...";
     ifstream inputFile;
-    inputFile.open("natureChart.txt");
+    inputFile.open("init/natureChart.txt");
+    if(!inputFile.is_open()){
+        cout << "\n Error: natureChart.txt not found\n";
+        assert(inputFile.is_open());
+    }
     for(unsigned i = 0; i < 5; i++){
         for(unsigned j = 0; j < 5; j++){
             inputFile >> natureChart[i][j];
         }
     }
+    cout << "Done!\n";
 }
 
 int main(int argc, char** argv){
 
     if(argc == 2){
         cout << "Starting simulation...\n";
+        cout << "Input path: " << argv[1] <<"\n";
     }
+
     srand(time(NULL));
     initEffChart();
+    initNatureChart();
 
     string filename = argv[1];
-    //string filename = "input/poke2.txt";
+    //string filename = "input/pokemon.txt";
     //string mode;
     ifstream inputFile;
     string command;
@@ -445,6 +526,7 @@ int main(int argc, char** argv){
     inputFile >> pokemon2;
     
     inputFile >> command;
+
     if(command == "Rounds:") 
     {
         inputFile >> rounds;
