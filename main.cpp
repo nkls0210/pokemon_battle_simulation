@@ -1,5 +1,5 @@
-#include "pokemon.h"
 #include "init.h"
+#include "pokemon.h"
 #include "type.h"
 #include "moves.h"
 

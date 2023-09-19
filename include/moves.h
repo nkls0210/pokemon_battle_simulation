@@ -8,6 +8,8 @@
 
 using std::istream, std::string;
 
+const string status[7] = {"", "PAR", "PSN", "TOX", "BRN", "SLP", "FRZ"};
+
 class Move{
     public:
     string attackName;
@@ -43,6 +45,6 @@ class BoostMove: public Move{
 };
 
 Move* operator>>(istream&, Move*&);
-StatusMove operator>>(istream&, StatusMove*&);
+StatusMove* operator>>(istream&, StatusMove*&);
 
 #endif

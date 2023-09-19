@@ -1,10 +1,10 @@
 Pokemon: Venusaur Grass Poison
 Nature: Bold
 Stats: 301 200 202 236 236 196 
-StatusMove: Toxic Poison 0 100 0 BRN 100
-StatusMove: Toxic Poison 0 100 0 BRN 100
-StatusMove: Toxic Poison 0 100 0 BRN 100
-StatusMove: Toxic Poison 0 100 0 BRN 100
+Move: PsychicMove Psychic 10 100 0
+Move: PsychicMove Psychic 10 100 0
+Move: PsychicMove Psychic 10 100 0
+Move: PsychicMove Psychic 10 100 0
 
 Pokemon: Primeape Fighting none
 Nature: Adamant
@@ -14,4 +14,4 @@ Move: doNothing Normal 0 100 0
 Move: doNothing Normal 0 100 0
 Move: doNothing Normal 0 100 0
 
-Rounds: 150
+Rounds: 5

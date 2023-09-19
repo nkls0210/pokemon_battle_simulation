@@ -8,10 +8,6 @@
 
 using std::cout, std::ifstream, std::string;
 
-static double effChart[19][19];
-static string natureChart[5][5];
-const string status[7] = {"", "PAR", "PSN", "TOX", "BRN", "SLP", "FRZ"};
-
 void initEffChart();
 void initNatureChart();
 void printTurnEnd(Pokemon&, Pokemon&);

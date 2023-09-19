@@ -6,13 +6,15 @@
 #include <string>
 #include <cassert>
 #include "moves.h"
-#include "init.h"
 #include "type.h"
 
 using std::cout, std::vector, std::string, std::istream;
 
 #define SLEEP 0
 #define TOXIC 1
+
+static double effChart[19][19];
+static string natureChart[5][5];
 
 class Pokemon{
     public:
