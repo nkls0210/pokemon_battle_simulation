@@ -2,11 +2,12 @@
 #define MOVES_H
 
 #include <string>
+#include <vector>
 #include <iostream>
 #include <cassert>
 #include "type.h"
 
-using std::istream, std::string;
+using std::istream, std::string, std::vector;
 
 const string status[7] = {"", "PAR", "PSN", "TOX", "BRN", "SLP", "FRZ"};
 
@@ -19,32 +20,50 @@ class Move{
     bool physicalMove;  //physical, special
 
     Move();
-    Move(string n, string t, unsigned d, unsigned acc, bool phys);
+    Move(string, string, unsigned, unsigned, bool);
     
     virtual unsigned moveEffect();
+    virtual unsigned moveHealing(unsigned);
+    
 };
 
 class StatusMove: public Move{
     public:
     unsigned statusCondValue;
     unsigned chance;
+
     StatusMove();
-    StatusMove(string n, string t, unsigned s, unsigned acc, bool phys, unsigned scv, unsigned c);
+    StatusMove(string, string, unsigned, unsigned, bool, unsigned, unsigned);
 
     unsigned moveEffect();
+    unsigned moveHealing(unsigned);
 };
 
 class HealingMove: public Move{
     public:
     unsigned healingPrecent;
+    
+    HealingMove();
+    HealingMove(string, string, unsigned, unsigned, bool, unsigned);
+
+    unsigned moveEffect();
+    unsigned moveHealing(unsigned);
 };
 
 class BoostMove: public Move{
     public:
     int statBoosts[5];
+
+    BoostMove();
+    BoostMove(string, string, unsigned, unsigned, bool, vector<int>);
+
+    unsigned moveEffect();
+    unsigned moveHealing(unsigned);
 };
 
 Move* operator>>(istream&, Move*&);
 StatusMove* operator>>(istream&, StatusMove*&);
+HealingMove* operator>>(istream&, HealingMove*&);
+BoostMove* operator>>(istream&, BoostMove*&);
 
 #endif

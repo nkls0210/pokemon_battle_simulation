@@ -221,17 +221,31 @@ unsigned Pokemon::damageCalc(Pokemon& other, Move*& move){
         else if((typingMultiplier < 1) && damageIsNotZero){
             cout << "It's not very effective...\n";
         }
+
+        if(damage > other.currentStats[0]){
+            damage = other.currentStats[0];
+        }
         return damage;
     }
+
+void Pokemon::addHP(unsigned HP){
+    currentStats[0] += HP;
+    if(currentStats[0] > baseStats[0]){
+        currentStats[0] = baseStats[0];
+    }
+}
 
 void Pokemon::attack(Pokemon& other, Move*& move){
         unsigned hit = rand() % 100;
         unsigned tmpCondValue = other.conditionValue;
+        unsigned healing = 0;
 
         if(isAlive() && other.isAlive() && canAttack(conditionValue)){
             cout << name << " uses " << move->attackName << "\n";
             if(hit < move->accuracy){
                 other.currentStats[0] -= damageCalc(other,move);
+                healing = move->moveHealing(damageCalc(other,move));
+                addHP(healing);
 
                 if(other.isAlive() && (other.conditionValue == 0)){
                     other.conditionValue = move->moveEffect();
@@ -259,6 +273,8 @@ Pokemon* operator>>(istream& in, Pokemon*& poke){
 
     Move* move;
     StatusMove* sMove;
+    HealingMove* hMove;
+    BoostMove* bMove;
     string command;
     string typeString;
     Type tmpType;
@@ -285,7 +301,6 @@ Pokemon* operator>>(istream& in, Pokemon*& poke){
 
     for(unsigned i = 0; i < 4; i++){
         in >> command;
-        assert((command == "Move:") || (command == "StatusMove:"));
         if(command == "Move:"){
             in >> move;
             moveset.push_back(move);
@@ -293,6 +308,15 @@ Pokemon* operator>>(istream& in, Pokemon*& poke){
         else if(command == "StatusMove:"){
             in >> sMove;
             moveset.push_back(sMove);
+        }
+        else if(command == "HealingMove:"){
+            in >> hMove;
+            moveset.push_back(hMove);
+        }
+        else{
+            cout << "Unknown command: " << command << "\n";
+            bool moveUnknown = false;
+            assert(moveUnknown);
         }
     }
     poke = new Pokemon(name,nature,pokeStats,moveset,typing);

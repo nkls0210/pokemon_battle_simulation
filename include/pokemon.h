@@ -20,7 +20,7 @@ class Pokemon{
     public:
     string name;
     string nature;
-    unsigned baseStats[6];
+    int baseStats[6];
     int currentStats[6];
     Move* moveset[4];
     Type typing[2];
@@ -47,6 +47,8 @@ class Pokemon{
     void statusStatChange(unsigned);
 
     unsigned damageCalc(Pokemon&, Move*&);
+
+    void addHP(unsigned);
 
     void attack(Pokemon&, Move*&);
 };
