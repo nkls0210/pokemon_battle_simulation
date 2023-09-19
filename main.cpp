@@ -14,7 +14,7 @@ int main(int argc, char** argv){
     srand(time(NULL));
     initEffChart();
     initNatureChart();
-
+    
     //string filename = argv[1];
     string filename = "input/pokemon.txt";
     //string mode = argv[2];
