@@ -49,6 +49,10 @@ Pokemon::Pokemon():name("noName"), conditionValue(0){
             typing[i] = Type("none");
             turnCounters[i] = 0;
         }
+
+        for(unsigned i = 0; i < 5; i++){
+            buffs[i] = 0;
+        }
     }
 
 Pokemon::Pokemon(string n, string nat, vector<unsigned> stats, vector<Move*> moves, vector<Type*> types): name(n), conditionValue(0){
@@ -57,6 +61,9 @@ Pokemon::Pokemon(string n, string nat, vector<unsigned> stats, vector<Move*> mov
         initTyping(types);
         initNature(nat);
         turnCounters[SLEEP] = 0; turnCounters[TOXIC] = 0; 
+        for(unsigned i = 0; i < 5; i++){
+            buffs[i] = 0;
+        }
 }
 
 bool Pokemon::isAlive(){
@@ -187,7 +194,7 @@ void Pokemon::statusStatChange(unsigned condValue){
 
 unsigned Pokemon::damageCalc(Pokemon& other, Move*& move){
         unsigned crit = rand() % 100;
-        unsigned damage;
+        int damage;
         double typingMultiplier = 1;
 
         damage = move->strength;
@@ -239,13 +246,18 @@ void Pokemon::attack(Pokemon& other, Move*& move){
         unsigned hit = rand() % 100;
         unsigned tmpCondValue = other.conditionValue;
         unsigned healing = 0;
+        unsigned damage;
 
         if(isAlive() && other.isAlive() && canAttack(conditionValue)){
             cout << name << " uses " << move->attackName << "\n";
             if(hit < move->accuracy){
-                other.currentStats[0] -= damageCalc(other,move);
-                healing = move->moveHealing(damageCalc(other,move));
-                addHP(healing);
+                damage = damageCalc(other,move);
+                other.currentStats[0] -= damage;
+                healing = move->moveHealing(damage);
+                if(healing != 0){
+                    cout << name << " healed "<< healing << " HP\n";
+                    addHP(healing);
+                }
 
                 if(other.isAlive() && (other.conditionValue == 0)){
                     other.conditionValue = move->moveEffect();
@@ -274,7 +286,7 @@ Pokemon* operator>>(istream& in, Pokemon*& poke){
     Move* move;
     StatusMove* sMove;
     HealingMove* hMove;
-    BoostMove* bMove;
+    BuffMove* bMove;
     string command;
     string typeString;
     Type tmpType;
@@ -312,6 +324,10 @@ Pokemon* operator>>(istream& in, Pokemon*& poke){
         else if(command == "HealingMove:"){
             in >> hMove;
             moveset.push_back(hMove);
+        }
+        else if(command == "BuffMove:"){
+            in >> bMove;
+            moveset.push_back(bMove);
         }
         else{
             cout << "Unknown command: " << command << "\n";

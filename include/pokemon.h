@@ -22,6 +22,7 @@ class Pokemon{
     string nature;
     int baseStats[6];
     int currentStats[6];
+    int buffs[5]; // 0 = atk.... 4 = speed
     Move* moveset[4];
     Type typing[2];
     unsigned conditionValue;
@@ -49,6 +50,8 @@ class Pokemon{
     unsigned damageCalc(Pokemon&, Move*&);
 
     void addHP(unsigned);
+
+    void updateStats(vector<int>);
 
     void attack(Pokemon&, Move*&);
 };

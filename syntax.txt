@@ -4,5 +4,6 @@ Stats: [HP Stat] [ATK Stat] [DEF Stat] [SATK Stat] [SDEF Stat] [SPEED Stat]
 Move: [Name] [Type] [Strength] [Accuracy] [Physical?]
 StatusMove: [Name] [Type] [Strength] [Accuracy] [Physical?] [Condition] [chanceOfCondition]
 HealingMove: [Name] [Type] [Strength] [Accuracy] [Physical?] [HealingPercentage]
+BuffMove: [Name] [Type] [Strength] [Accuracy] [Physical?] [ATK change] [DEF change] [SPA change] [SPD change] [SPE change] [BuffChance]
 
 Rounds: [Number of Rounds]

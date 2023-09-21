@@ -11,6 +11,7 @@ unsigned Move::moveHealing(unsigned buf){
     return buf;
 };
 
+
 StatusMove::StatusMove(): Move(){}
 StatusMove::StatusMove(string n, string t, unsigned s, unsigned acc, bool phys, unsigned scv, unsigned c): Move(n,t,s,acc,phys), statusCondValue(scv), chance(c){}
 unsigned StatusMove::moveEffect(){
@@ -24,6 +25,7 @@ unsigned StatusMove::moveHealing(unsigned buf){
     buf = 0;
     return buf;
 };
+vector<int>* moveStatChanges(vector<int>);
 
 HealingMove::HealingMove(): Move(), healingPrecent(0){}
 HealingMove::HealingMove(string n, string t, unsigned s, unsigned acc, bool phys, unsigned heal): Move(n,t,s,acc,phys), healingPrecent(heal){};
@@ -31,23 +33,24 @@ unsigned HealingMove::moveEffect(){
     return 0;
 }
 unsigned HealingMove::moveHealing(unsigned damage){
-    return (damage*healingPrecent/100);
+    unsigned healValue = damage*healingPrecent/100;
+    return healValue;
 }
 
-BoostMove::BoostMove():Move(){
-    for(unsigned i = 0; i < 5; i++){
-        statBoosts[i]= 0;
-    }
+BuffMove::BuffMove():Move(){
+    
 }
-BoostMove::BoostMove(string n, string t, unsigned s, unsigned acc, bool phys, vector<int> statChange): Move(n,t,s,acc,phys){
-    for(unsigned i = 0; i < statChange.size(); i++){
-        statBoosts[i]= statChange[i];
+BuffMove::BuffMove(string n, string t, unsigned s, unsigned acc, bool phys, vector<int> buffVector, unsigned chance):
+Move(n,t,s,acc,phys), buffChance(chance){
+    assert(buffVector.size() == 5);
+    for(unsigned i = 0; i < buffVector.size(); i++){
+        statBuffs[i] = buffVector[i];
     }
 };
-unsigned BoostMove::moveEffect(){
+unsigned BuffMove::moveEffect(){
     return 0;
 };
-unsigned BoostMove::moveHealing(unsigned buf){
+unsigned BuffMove::moveHealing(unsigned buf){
     buf = 0;
     return buf;
 };
@@ -116,4 +119,29 @@ HealingMove* operator>>(istream& in, HealingMove*& move){
     return move;
 }
 
-BoostMove* operator>>(istream& in, BoostMove*& move){}
+BuffMove* operator>>(istream& in, BuffMove*& move){
+    string name;
+    string type;
+    unsigned strength;
+    unsigned accuracy;
+    bool isPhys;
+    vector<int> buffs;
+    unsigned chance;
+    int tmpChanges;
+
+    in >> name;
+    in >> type;
+    in >> strength;
+    in >> accuracy;
+    in >> isPhys;
+
+    for(unsigned i = 0; i < 5; i++){
+        in>>tmpChanges;
+        buffs.push_back(tmpChanges);
+    }
+
+    in >> chance;
+
+    move = new BuffMove(name,type,strength,accuracy,isPhys,buffs,chance);
+    return move;
+}

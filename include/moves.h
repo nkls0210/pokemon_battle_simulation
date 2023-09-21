@@ -10,6 +10,7 @@
 using std::istream, std::string, std::vector;
 
 const string status[7] = {"", "PAR", "PSN", "TOX", "BRN", "SLP", "FRZ"};
+const string statNames[6] = {"", "ATK", "DEF", "SPA", "SPD", "SPE"};
 
 class Move{
     public:
@@ -50,13 +51,14 @@ class HealingMove: public Move{
     unsigned moveHealing(unsigned);
 };
 
-class BoostMove: public Move{
+class BuffMove: public Move{
     public:
-    int statBoosts[5];
+    int statBuffs[5];
+    unsigned buffChance;
 
-    BoostMove();
-    BoostMove(string, string, unsigned, unsigned, bool, vector<int>);
-
+    BuffMove();
+    BuffMove(string, string, unsigned, unsigned, bool, vector<int>, unsigned);
+    
     unsigned moveEffect();
     unsigned moveHealing(unsigned);
 };
@@ -64,6 +66,6 @@ class BoostMove: public Move{
 Move* operator>>(istream&, Move*&);
 StatusMove* operator>>(istream&, StatusMove*&);
 HealingMove* operator>>(istream&, HealingMove*&);
-BoostMove* operator>>(istream&, BoostMove*&);
+BuffMove* operator>>(istream&, BuffMove*&);
 
 #endif
