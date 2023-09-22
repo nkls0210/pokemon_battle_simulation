@@ -242,6 +242,53 @@ void Pokemon::addHP(unsigned HP){
     }
 }
 
+void Pokemon::convertBuffs(){
+    for(unsigned i=0; i < 5; i++){
+        if(buffs[i] > 0){
+            currentStats[i+1] = baseStats[i+1]*(buffs[i]+2)/2;
+        }
+        else if(buffs[i] < 0){
+            currentStats[i+1] = baseStats[i+1]*2/((buffs[i]*(-1))+2);
+        }
+    }
+}
+
+void Pokemon::updateBuffs(vector<int> statBuffs){
+    for(unsigned i = 0; i < 5; i++){
+        if(statBuffs[i] > 0){
+            if(buffs[i] != 6){
+                cout << name << "'s " << stat[i] << " rose";
+                if((statBuffs[i] >= 2) &&(buffs[i] < 5)){
+                    cout << " sharply";
+                }
+                cout << "!\n";
+            }
+            else{
+                cout << name << "'s " << stat[i] << " can't go any higher!\n";
+            }
+        }
+        else if(statBuffs[i] < 0){
+            if(buffs[i] != -6){
+                cout << name << "'s " << stat[i] << " fell";
+                if((statBuffs[i] <= -2) &&(buffs[i] > -5)){
+                    cout << " sharply";
+                }
+                cout << "!\n";
+            }
+            else{
+                cout << name << "'s " << stat[i] << " can't go any lower!\n";
+            }
+        }
+        buffs[i] += statBuffs[i];
+        if(buffs[i] > 6){
+            buffs[i] = 6;
+        }
+        else if(buffs[i] < -6){
+            buffs[i] = -6;
+        }
+    }
+}
+
 void Pokemon::attack(Pokemon& other, Move*& move){
         unsigned hit = rand() % 100;
         unsigned tmpCondValue = other.conditionValue;

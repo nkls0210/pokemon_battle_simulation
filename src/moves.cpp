@@ -10,7 +10,13 @@ unsigned Move::moveHealing(unsigned buf){
     buf = 0;
     return buf;
 };
-
+vector<int>  Move::moveBuff(){
+    vector<int> tmp;
+    for(unsigned i = 0; i < 5; i++){
+        tmp.push_back(0);
+    }
+    return tmp;
+}
 
 StatusMove::StatusMove(): Move(){}
 StatusMove::StatusMove(string n, string t, unsigned s, unsigned acc, bool phys, unsigned scv, unsigned c): Move(n,t,s,acc,phys), statusCondValue(scv), chance(c){}
@@ -25,7 +31,14 @@ unsigned StatusMove::moveHealing(unsigned buf){
     buf = 0;
     return buf;
 };
-vector<int>* moveStatChanges(vector<int>);
+vector<int>  StatusMove::moveBuff(){
+    vector<int> tmp;
+    for(unsigned i = 0; i < 5; i++){
+        tmp.push_back(0);
+    }
+    return tmp;
+}
+
 
 HealingMove::HealingMove(): Move(), healingPrecent(0){}
 HealingMove::HealingMove(string n, string t, unsigned s, unsigned acc, bool phys, unsigned heal): Move(n,t,s,acc,phys), healingPrecent(heal){};
@@ -36,9 +49,19 @@ unsigned HealingMove::moveHealing(unsigned damage){
     unsigned healValue = damage*healingPrecent/100;
     return healValue;
 }
+vector<int>  HealingMove::moveBuff(){
+    vector<int> tmp;
+    for(unsigned i = 0; i < 5; i++){
+        tmp.push_back(0);
+    }
+    return tmp;
+}
 
 BuffMove::BuffMove():Move(){
-    
+    buffChance = 0;
+    for(unsigned i = 0; i < 5; i++){
+        statBuffs[i] = 0;
+    }
 }
 BuffMove::BuffMove(string n, string t, unsigned s, unsigned acc, bool phys, vector<int> buffVector, unsigned chance):
 Move(n,t,s,acc,phys), buffChance(chance){
@@ -54,7 +77,22 @@ unsigned BuffMove::moveHealing(unsigned buf){
     buf = 0;
     return buf;
 };
-
+vector<int>  BuffMove::moveBuff(){
+    unsigned randVal = rand() % 100;
+    vector<int> ret;
+    if(randVal < buffChance){
+        for(unsigned i = 0; i < 5; i++){
+            ret.push_back(statBuffs[i]);
+        }
+        return ret;
+    }
+    else{
+        for(unsigned i = 0; i < 5; i++){
+            ret.push_back(0);
+        }
+        return ret;
+    }
+}
 
 Move* operator>>(istream& in, Move*& move){
     string name;

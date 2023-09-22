@@ -51,7 +51,9 @@ class Pokemon{
 
     void addHP(unsigned);
 
-    void updateStats(vector<int>);
+    void convertBuffs();
+
+    void updateBuffs(vector<int>);
 
     void attack(Pokemon&, Move*&);
 };

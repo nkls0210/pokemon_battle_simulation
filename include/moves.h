@@ -10,7 +10,7 @@
 using std::istream, std::string, std::vector;
 
 const string status[7] = {"", "PAR", "PSN", "TOX", "BRN", "SLP", "FRZ"};
-const string statNames[6] = {"", "ATK", "DEF", "SPA", "SPD", "SPE"};
+const string stat[5] = {"Attack", "Defense", "Sp. Att.", "Sp. Def.", "Speed"};
 
 class Move{
     public:
@@ -25,6 +25,7 @@ class Move{
     
     virtual unsigned moveEffect();
     virtual unsigned moveHealing(unsigned);
+    virtual vector<int> moveBuff();
     
 };
 
@@ -38,6 +39,7 @@ class StatusMove: public Move{
 
     unsigned moveEffect();
     unsigned moveHealing(unsigned);
+    vector<int> moveBuff();
 };
 
 class HealingMove: public Move{
@@ -49,6 +51,7 @@ class HealingMove: public Move{
 
     unsigned moveEffect();
     unsigned moveHealing(unsigned);
+    vector<int> moveBuff();
 };
 
 class BuffMove: public Move{
@@ -61,6 +64,7 @@ class BuffMove: public Move{
     
     unsigned moveEffect();
     unsigned moveHealing(unsigned);
+    vector<int> moveBuff();
 };
 
 Move* operator>>(istream&, Move*&);
