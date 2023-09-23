@@ -5,10 +5,11 @@
 #include <vector>
 #include <string>
 #include <cassert>
+#include <fstream>
 #include "moves.h"
 #include "type.h"
 
-using std::cout, std::vector, std::string, std::istream;
+using std::cout, std::vector, std::ifstream, std::string, std::istream;
 
 #define SLEEP 0
 #define TOXIC 1
@@ -20,7 +21,11 @@ class Pokemon{
     public:
     string name;
     string nature;
+    unsigned level;
     int baseStats[6];
+    unsigned evs[6];
+    unsigned ivs[6];
+    int firstStats[6];
     int currentStats[6];
     int buffs[5]; // 0 = atk.... 4 = speed
     Move* moveset[4];
@@ -32,10 +37,13 @@ class Pokemon{
     void initStats(vector<unsigned>);
     void initNature(string);
     void initTyping(vector<Type*>);
+    void initEVs(vector<unsigned>);
+    void initIVs(vector<unsigned>);
+    void calcFirstStats();
     //initializers
 
     Pokemon();
-    Pokemon(string, string, vector<unsigned>, vector<Move*>, vector<Type*>);
+    Pokemon(string, string, unsigned, vector<unsigned>, vector<unsigned>, vector<unsigned>, vector<Move*>, vector<Type*>);
 
     bool isAlive();
 
@@ -57,6 +65,7 @@ class Pokemon{
 
     void attack(Pokemon&, Move*&);
 };
+
 
 Pokemon* operator>>(istream&, Pokemon*&);
 

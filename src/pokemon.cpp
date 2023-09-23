@@ -20,8 +20,8 @@ void Pokemon::initNature(string nameNature){
         for(unsigned i = 0; i < 5; i++){
             for(unsigned j = 0; j < 5; j++){
                 if(natureChart[i][j] == nameNature){
-                    baseStats[i+1] = baseStats[i+1] + baseStats[i+1]*0.1;
-                    baseStats[j+1] = baseStats[j+1] - baseStats[j+1]*0.1;
+                    firstStats[i+1] *= 1.1;
+                    firstStats[j+1] *= 0.9;
                     break;
                 }
             }
@@ -34,6 +34,37 @@ void Pokemon::initTyping(vector<Type*> types){
             typing[i] = *types[i];
         }
     }
+
+void Pokemon::initEVs(vector<unsigned> evVec){
+    assert(evVec.size() == 6);
+    for(unsigned i = 0; i < 6; i++){
+        assert(evVec[i] < 253);
+        evs[i] = evVec[i];
+    }
+}
+
+void Pokemon::initIVs(vector<unsigned> ivVec){
+    assert(ivVec.size() == 6);
+    for(unsigned i = 0; i < 6; i++){
+        assert(ivVec[i] < 32);
+        ivs[i] = ivVec[i];
+    }
+}
+
+void Pokemon::calcFirstStats(){
+    unsigned tmpCalc;
+    unsigned evCalc;
+
+    evCalc = evs[0]/4;
+    tmpCalc = (2*baseStats[0] + ivs[0] + evCalc)*level/100;
+    firstStats[0] = tmpCalc+level+10;
+
+    for(unsigned i = 1; i < 6; i++){
+        evCalc = evs[i]/4;
+        tmpCalc = (2*baseStats[i] + ivs[i] + evCalc)*level/100;
+        firstStats[i] = tmpCalc+5;
+    }
+}
 
 Pokemon::Pokemon():name("noName"), conditionValue(0){
         for(unsigned i = 0; i < 6; i++){
@@ -55,14 +86,20 @@ Pokemon::Pokemon():name("noName"), conditionValue(0){
         }
     }
 
-Pokemon::Pokemon(string n, string nat, vector<unsigned> stats, vector<Move*> moves, vector<Type*> types): name(n), conditionValue(0){
+Pokemon::Pokemon(string n, string nat, unsigned lvl, vector<unsigned> stats, vector<unsigned> ev, vector<unsigned> iv, vector<Move*> moves, vector<Type*> types): name(n),level(lvl), conditionValue(0){
         initStats(stats);
         initMoveset(moves);
         initTyping(types);
-        initNature(nat);
+        initEVs(ev);
+        initIVs(iv);
         turnCounters[SLEEP] = 0; turnCounters[TOXIC] = 0; 
         for(unsigned i = 0; i < 5; i++){
             buffs[i] = 0;
+        }
+        calcFirstStats();
+        initNature(nat);
+        for(unsigned i = 0; i < 6; i++){
+            currentStats[i] = firstStats[i];
         }
 }
 
@@ -289,7 +326,6 @@ void Pokemon::updateBuffs(vector<int> statBuffs){
     }
 }
 
-
 void Pokemon::attack(Pokemon& other, Move*& move){
         unsigned hit = rand() % 100;
         unsigned tmpCondValue = other.conditionValue;
@@ -329,64 +365,83 @@ void Pokemon::attack(Pokemon& other, Move*& move){
     }
 
 Pokemon* operator>>(istream& in, Pokemon*& poke){
+    ifstream pokedex;
+    pokedex.open("input/gen_1.txt");
+    assert(pokedex.is_open());
+
+    string tmpString;
+    string type;
+    string command;
     string name;
     string nature;
-    vector<Type*> typing;
-    vector<unsigned> pokeStats;
-    vector<Move*> moveset;
+    unsigned level;
+    unsigned statNum;
+    vector<unsigned> baseStats;
+    vector<unsigned> EVs;
+    vector<unsigned> IVs;
+    vector<Move*> moves;
+    vector<Type*> types;
 
-    Move* move;
-    StatusMove* sMove;
-    HealingMove* hMove;
-    BuffMove* bMove;
-    string command;
-    string typeString;
-    Type tmpType;
-    int tmpValue;
-
-    in >> command;
-    assert(command == "Pokemon:");
     in >> name;
-    for(unsigned i = 0; i < 2; i++){
-        in >> typeString;
-        typing.push_back(new Type(typeString));
+    while(pokedex.peek() != EOF){
+        in >> tmpString;
+        if(tmpString == name){
+            in >> type;
+            types.push_back(new Type(type));
+            in >> type;
+            types.push_back(new Type(type));
+
+            for(unsigned i = 0; i < 6; i++){
+                in >> statNum;
+                baseStats.push_back(statNum);
+            }
+            break;
+        }
     }
-
+    pokedex.close();
     in >> command;
-    assert(command == "Nature:");
-    in >> nature;
-
+    assert(command == "Level:");
+    in >> level;
+    
     in >> command;
-    assert(command == "Stats:");
+    assert(command == "EV:");
     for(unsigned i = 0; i < 6; i++){
-        in >> tmpValue;
-        pokeStats.push_back(tmpValue);
+        in >> statNum;
+        assert(statNum < 253);
+        EVs.push_back(statNum);
     }
 
+    in >> command;
+    assert(command == "IV:");
+    for(unsigned i = 0; i < 6; i++){
+        in >> statNum;
+        assert(statNum < 32);
+        IVs.push_back(statNum);
+    }
     for(unsigned i = 0; i < 4; i++){
         in >> command;
         if(command == "Move:"){
-            in >> move;
-            moveset.push_back(move);
+            Move* tmp;
+            in >> tmp;
+            moves.push_back(tmp); 
         }
         else if(command == "StatusMove:"){
-            in >> sMove;
-            moveset.push_back(sMove);
+            StatusMove* tmp;
+            in >> tmp;
+            moves.push_back(tmp); 
         }
         else if(command == "HealingMove:"){
-            in >> hMove;
-            moveset.push_back(hMove);
+            HealingMove* tmp;
+            in >> tmp;
+            moves.push_back(tmp); 
         }
         else if(command == "BuffMove:"){
-            in >> bMove;
-            moveset.push_back(bMove);
-        }
-        else{
-            cout << "Unknown command: " << command << "\n";
-            bool moveUnknown = false;
-            assert(moveUnknown);
+            BuffMove* tmp;
+            in >> tmp;
+            moves.push_back(tmp); 
         }
     }
-    poke = new Pokemon(name,nature,pokeStats,moveset,typing);
+
+    poke = new Pokemon(name,nature,level,baseStats,EVs,IVs,moves,types);
     return poke;
 }

@@ -1,6 +1,22 @@
+OLD:
+
 Pokemon: [PokeName] [Type1] [Type2]
 Nature: [Nature]
 Stats: [HP Stat] [ATK Stat] [DEF Stat] [SATK Stat] [SDEF Stat] [SPEED Stat] 
+Move: [Name] [Type] [Strength] [Accuracy] [Physical?]
+StatusMove: [Name] [Type] [Strength] [Accuracy] [Physical?] [Condition] [chanceOfCondition]
+HealingMove: [Name] [Type] [Strength] [Accuracy] [Physical?] [HealingPercentage]
+BuffMove: [Name] [Type] [Strength] [Accuracy] [Physical?] [ATK change] [DEF change] [SPA change] [SPD change] [SPE change] [BuffChance]
+
+Rounds: [Number of Rounds]
+
+NEW:
+
+[PokemonName]
+Level: [Level]
+Nature: [Nature]
+EV: [HP EVs] [ATK EVs] [DEF EVs] [SPA EVs] [SPD EVs] [SPE EVs]
+IV: [HP IVs] [ATK IVs] [DEF IVs] [SPA IVs] [SPD IVs] [SPE IVs]
 Move: [Name] [Type] [Strength] [Accuracy] [Physical?]
 StatusMove: [Name] [Type] [Strength] [Accuracy] [Physical?] [Condition] [chanceOfCondition]
 HealingMove: [Name] [Type] [Strength] [Accuracy] [Physical?] [HealingPercentage]
