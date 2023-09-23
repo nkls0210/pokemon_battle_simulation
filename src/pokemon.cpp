@@ -20,8 +20,8 @@ void Pokemon::initNature(string nameNature){
         for(unsigned i = 0; i < 5; i++){
             for(unsigned j = 0; j < 5; j++){
                 if(natureChart[i][j] == nameNature){
-                    currentStats[i+1] = currentStats[i+1] + baseStats[i+1]*0.1;
-                    currentStats[j+1] = currentStats[j+1] - baseStats[j+1]*0.1;
+                    baseStats[i+1] = baseStats[i+1] + baseStats[i+1]*0.1;
+                    baseStats[j+1] = baseStats[j+1] - baseStats[j+1]*0.1;
                     break;
                 }
             }
@@ -289,6 +289,7 @@ void Pokemon::updateBuffs(vector<int> statBuffs){
     }
 }
 
+
 void Pokemon::attack(Pokemon& other, Move*& move){
         unsigned hit = rand() % 100;
         unsigned tmpCondValue = other.conditionValue;
@@ -305,6 +306,10 @@ void Pokemon::attack(Pokemon& other, Move*& move){
                     cout << name << " healed "<< healing << " HP\n";
                     addHP(healing);
                 }
+
+                updateBuffs(move->moveBuff());
+                convertBuffs();
+                statusStatChange(conditionValue);
 
                 if(other.isAlive() && (other.conditionValue == 0)){
                     other.conditionValue = move->moveEffect();

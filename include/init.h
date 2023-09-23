@@ -11,6 +11,7 @@ using std::cout, std::ifstream, std::string;
 void initEffChart();
 void initNatureChart();
 void printTurnEnd(Pokemon&, Pokemon&);
+void printStats(Pokemon&);
 void simulateBattle(Pokemon&, Pokemon&, unsigned);
 
 #endif

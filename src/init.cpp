@@ -55,6 +55,13 @@ void printTurnEnd(Pokemon& poke1, Pokemon& poke2){
     }   
 }
 
+void printStats(Pokemon& poke){
+    cout << poke.name << "'s Stats:\n";
+    for(unsigned i = 0; i < 5; i++){
+        cout << stat[i] << ": " << poke.currentStats[i+1] << "(" << poke.buffs[i] << ")\n";
+    }
+}
+
 void simulateBattle(Pokemon& poke1, Pokemon& poke2, unsigned maxRounds){
     bool oneIsFaster = true;
     unsigned pickMove1, pickMove2;
