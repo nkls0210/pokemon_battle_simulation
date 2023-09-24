@@ -28,7 +28,7 @@ class Pokemon{
     int firstStats[6];
     int currentStats[6];
     int buffs[5]; // 0 = atk.... 4 = speed
-    Move* moveset[4];
+    vector<Move*> moveset;
     Type typing[2];
     unsigned conditionValue;
     unsigned turnCounters[2];
@@ -47,7 +47,7 @@ class Pokemon{
 
     bool isAlive();
 
-    bool canAttack(unsigned);
+    bool canAttack();
 
     void takeStatusDamage(unsigned);
 

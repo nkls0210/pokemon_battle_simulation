@@ -6,12 +6,15 @@
 #include <iostream>
 #include <fstream>
 
-using std::cout, std::ifstream, std::string;
+using std::cout, std::ifstream, std::string, std::cin;
 
 void initEffChart();
 void initNatureChart();
-void printTurnEnd(Pokemon&, Pokemon&);
+void printPokemonHP(Pokemon&, Pokemon&);
 void printStats(Pokemon&);
-void simulateBattle(Pokemon&, Pokemon&, unsigned);
+void printStatsShort(Pokemon&);
+void printMenuVSCPU(Pokemon&, Pokemon&);
+void computerBattle(Pokemon&, Pokemon&, unsigned);
+void humanVsComputer(Pokemon&, Pokemon&, unsigned, string);
 
 #endif

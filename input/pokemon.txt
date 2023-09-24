@@ -1,20 +1,21 @@
-Pokemon: Venusaur Grass Poison
-Nature: Adamant
-Stats: 301 200 202 236 236 196
+Venusaur
+Level: 81
+Nature: Modest
+EV: 252 0 0 252 0 4
+IV: 31 0 31 31 31 31
+HealingMove: GigaDrain Grass 75 100 0 50
+BuffMove: Growth Normal 0 100 0 1 0 1 0 0 100
+Move: Earthquake Ground 100 100 1
+StatusMove: Toxic Poison 0 90 0 TOX 100
 
-Move: Tackle Normal 40 100 1
-BuffMove: SwordsDance Normal 0 100 0 2 0 0 0 0 100
-BuffMove: SwordsDance Normal 0 100 0 2 0 0 0 0 100
-BuffMove: SwordsDance Normal 0 100 0 2 0 0 0 0 100
-
-
-Pokemon: Primeape Fighting none
-Nature: Adamant
-Stats: 1000 246 156 156 176 226
-
-Move: someMove Ghost 0 100 1
-Move: someMove Ghost 0 100 1
-Move: someMove Ghost 0 100 1
-Move: someMove Ghost 0 100 1
+Blastoise
+Level: 89
+Nature: Sassy
+EV: 252 0 0 4 252 0
+IV: 31 31 31 31 31 31
+Move: HydroPump Water 120 80 0
+StatusMove: IceBeam Ice 90 100 0 FRZ 10
+BuffMove: ShellSmash Normal 0 100 0 2 -1 2 -1 2 100
+Move: Strength Normal 80 100 1
 
 Rounds: 10

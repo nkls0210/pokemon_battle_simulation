@@ -1,9 +1,9 @@
 #include "pokemon.h"
 
 void Pokemon::initMoveset(vector<Move*> moves){
-        assert(moves.size() == 4);
+        assert(moves.size() < 5);
         for(unsigned i = 0; i < moves.size(); i++){
-            moveset[i] = moves[i];
+            moveset.push_back(moves[i]);
         }
     }
 
@@ -111,9 +111,9 @@ bool Pokemon::isAlive(){
         return true;
     }
 
-bool Pokemon::canAttack(unsigned condValue){
+bool Pokemon::canAttack(){
         int randValue = rand() % 100;
-        switch(condValue){
+        switch(conditionValue){
             case 1:
                 if(randValue < 25){
                     cout << name << " is paralyzed! It's unable to attack!\n";
@@ -129,14 +129,14 @@ bool Pokemon::canAttack(unsigned condValue){
                 else if(turnCounters[SLEEP] == 3){
                     cout << name << " woke up!\n";
                     turnCounters[SLEEP] = 0;
-                    condValue=0;
+                    conditionValue=0;
                     return true;
                 }
                 else{
                     if(randValue < 50){
                         cout << name << " woke up!\n";
                         turnCounters[SLEEP] = 0;
-                        condValue=0;
+                        conditionValue=0;
                         return true;
                     }
                     else{
@@ -167,16 +167,16 @@ void Pokemon::takeStatusDamage(unsigned condValue){
         switch(condValue){
             case 2:
                 cout << name << " took damage from poison!\n";
-                currentStats[0] = currentStats[0] - 0.12*baseStats[0];
+                currentStats[0] = currentStats[0] - 0.12*firstStats[0];
                 break;
             case 3:
                 cout << name << " took damage from poison!\n";
                 turnCounters[TOXIC]++;
-                currentStats[0] = currentStats[0] - (turnCounters[TOXIC]*0.06)*baseStats[0];
+                currentStats[0] = currentStats[0] - (turnCounters[TOXIC]*0.06)*firstStats[0];
                 break;
             case 4:
                 cout << name << " took damage from burn!\n";
-                currentStats[0] = currentStats[0] - 0.06*baseStats[0];
+                currentStats[0] = currentStats[0] - 0.06*firstStats[0];
                 break;
             default:
                 break;
@@ -274,18 +274,18 @@ unsigned Pokemon::damageCalc(Pokemon& other, Move*& move){
 
 void Pokemon::addHP(unsigned HP){
     currentStats[0] += HP;
-    if(currentStats[0] > baseStats[0]){
-        currentStats[0] = baseStats[0];
+    if(currentStats[0] > firstStats[0]){
+        currentStats[0] = firstStats[0];
     }
 }
 
 void Pokemon::convertBuffs(){
     for(unsigned i=0; i < 5; i++){
         if(buffs[i] > 0){
-            currentStats[i+1] = baseStats[i+1]*(buffs[i]+2)/2;
+            currentStats[i+1] = firstStats[i+1]*(buffs[i]+2)/2;
         }
         else if(buffs[i] < 0){
-            currentStats[i+1] = baseStats[i+1]*2/((buffs[i]*(-1))+2);
+            currentStats[i+1] = firstStats[i+1]*2/((buffs[i]*(-1))+2);
         }
     }
 }
@@ -332,7 +332,7 @@ void Pokemon::attack(Pokemon& other, Move*& move){
         unsigned healing = 0;
         unsigned damage;
 
-        if(isAlive() && other.isAlive() && canAttack(conditionValue)){
+        if(isAlive() && canAttack() && other.isAlive()){
             cout << name << " uses " << move->attackName << "\n";
             if(hit < move->accuracy){
                 damage = damageCalc(other,move);
@@ -366,7 +366,7 @@ void Pokemon::attack(Pokemon& other, Move*& move){
 
 Pokemon* operator>>(istream& in, Pokemon*& poke){
     ifstream pokedex;
-    pokedex.open("input/gen_1.txt");
+    pokedex.open("init/gen_1.txt");
     assert(pokedex.is_open());
 
     string tmpString;
@@ -383,26 +383,32 @@ Pokemon* operator>>(istream& in, Pokemon*& poke){
     vector<Type*> types;
 
     in >> name;
+
     while(pokedex.peek() != EOF){
-        in >> tmpString;
+        pokedex >> tmpString;
         if(tmpString == name){
-            in >> type;
+            pokedex >> type;
             types.push_back(new Type(type));
-            in >> type;
+            pokedex >> type;
             types.push_back(new Type(type));
 
             for(unsigned i = 0; i < 6; i++){
-                in >> statNum;
+                pokedex >> statNum;
                 baseStats.push_back(statNum);
             }
             break;
         }
     }
     pokedex.close();
+
     in >> command;
     assert(command == "Level:");
     in >> level;
-    
+
+    in >> command;
+    assert(command == "Nature:");
+    in >> nature;
+
     in >> command;
     assert(command == "EV:");
     for(unsigned i = 0; i < 6; i++){
@@ -418,6 +424,7 @@ Pokemon* operator>>(istream& in, Pokemon*& poke){
         assert(statNum < 32);
         IVs.push_back(statNum);
     }
+    
     for(unsigned i = 0; i < 4; i++){
         in >> command;
         if(command == "Move:"){
