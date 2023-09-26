@@ -57,6 +57,8 @@ class Pokemon{
 
     unsigned damageCalc(Pokemon&, Move*&);
 
+    unsigned ExpectedDamageCalc(Pokemon&, Move*&);
+
     void addHP(unsigned);
 
     void convertBuffs();
@@ -65,7 +67,6 @@ class Pokemon{
 
     void attack(Pokemon&, Move*&);
 };
-
 
 Pokemon* operator>>(istream&, Pokemon*&);
 

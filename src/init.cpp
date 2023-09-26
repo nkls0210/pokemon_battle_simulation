@@ -91,6 +91,42 @@ void printMenuVSCPU(Pokemon& own, Pokemon& cpu){
     cout << "Pick your Move: ";
 }
 
+unsigned randomCPUPick(Pokemon& cpu){
+    unsigned randVal;
+    randVal = rand() % (cpu.moveset).size();
+    return randVal;
+}
+
+unsigned beginnerCPUPick(Pokemon& cpu, Pokemon& other){
+    unsigned pickedMoveNum = 0;
+    unsigned damageOutput = 0;
+    unsigned lowestDamageOutput = 10e8;
+
+    for(unsigned i = 0; i < (cpu.moveset).size(); i++){
+        damageOutput = cpu.ExpectedDamageCalc(other,cpu.moveset[i]);
+        if((damageOutput < lowestDamageOutput) && (damageOutput != 0)){
+            pickedMoveNum = i;
+            lowestDamageOutput = damageOutput;
+        }
+    }
+    return pickedMoveNum;
+}
+
+unsigned highDamageCPUPick(Pokemon& cpu, Pokemon& other){
+    unsigned pickedMoveNum = 0;
+    unsigned damageOutput = 0;
+    unsigned highestOutput = 0;
+
+    for(unsigned i = 0; i < (cpu.moveset).size(); i++){
+        damageOutput = cpu.ExpectedDamageCalc(other,cpu.moveset[i]);
+        if(damageOutput > highestOutput){
+            pickedMoveNum = i;
+            highestOutput = damageOutput;
+        }
+    }
+    return pickedMoveNum;
+}
+
 void computerBattle(Pokemon& poke1, Pokemon& poke2, unsigned maxRounds){
     bool oneIsFaster = true;
     unsigned pickMove1, pickMove2;
@@ -128,7 +164,21 @@ void humanVsComputer(Pokemon& hum, Pokemon& cpu, unsigned rounds, string cpuMode
     unsigned humanPicksMove;
 
     for(unsigned i = 0; i < rounds; i++){
-        unsigned computerPicksMove = rand() % (cpu.moveset).size();
+        unsigned computerPicksMove;
+        if(cpuMode == cpuModes[1]){
+            computerPicksMove = beginnerCPUPick(cpu,hum);
+        }
+        else if(cpuMode == cpuModes[2]){
+            computerPicksMove = highDamageCPUPick(cpu,hum);
+        }
+        else if(cpuMode == cpuModes[0]){
+            computerPicksMove = randomCPUPick(cpu);
+        }
+        else{
+            bool unknownComputerMode = false;
+            assert(unknownComputerMode);
+        }
+        
         cout << "---------------------------Round " << i+1 <<"---------------------------\n";
         printMenuVSCPU(hum,cpu);
         cin >> humanPicksMove;

@@ -272,6 +272,28 @@ unsigned Pokemon::damageCalc(Pokemon& other, Move*& move){
         return damage;
     }
 
+unsigned Pokemon::ExpectedDamageCalc(Pokemon& other, Move*& move){
+        unsigned damage;
+        double typingMultiplier = 1;
+
+        damage = move->strength;
+        typingMultiplier *= effChart[(move->moveType).typeValue][(other.typing[0]).typeValue];
+        typingMultiplier *= effChart[(move->moveType).typeValue][(other.typing[1]).typeValue];
+        damage*=typingMultiplier;
+
+        if(move->physicalMove){
+            damage = damage*currentStats[1]/other.currentStats[2];
+        }
+        else{
+            damage = damage*currentStats[3]/other.currentStats[4];
+        }
+
+        if((typing[0].typeValue == (move->moveType).typeValue) ||(typing[1].typeValue == (move->moveType).typeValue)){
+            damage*= 1.5;
+        }
+        return damage;
+    }
+
 void Pokemon::addHP(unsigned HP){
     currentStats[0] += HP;
     if(currentStats[0] > firstStats[0]){

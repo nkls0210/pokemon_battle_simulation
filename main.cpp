@@ -5,7 +5,6 @@
 
 
 const string modes[] = {"simul", "battlecpu", "teambattle"};
-const string cpuModes[] = {"random", "beginner", "smart"};
 
 int main(int argc, char** argv){
 
@@ -46,9 +45,16 @@ int main(int argc, char** argv){
         inputFile >> rounds;
     }
 
+    if(mode == modes[0]){
+        computerBattle(*pokemon1,*pokemon2,rounds);
+    }
+    else if(mode == modes[1]){
+        humanVsComputer(*pokemon1, *pokemon2, rounds, cpuMode);
+    }
+    else if(mode == modes[2]){
+        cout << "Will be added in the future...";
+    }
 
-    //computerBattle(*pokemon1,*pokemon2,rounds);
-    humanVsComputer(*pokemon1, *pokemon2, rounds, cpuMode);
     inputFile.close();
     return 0;
 }
